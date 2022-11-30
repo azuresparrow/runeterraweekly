@@ -1,3 +1,4 @@
 /venv
-/secret.py
+secret.py
 __pycache__
+/static/cards
