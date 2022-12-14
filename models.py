@@ -15,7 +15,7 @@ def connect_db(app):
     db.init_app(app)
     
 class User(db.Model):
-    """Users can log in, and link to their riot account to submit challenge stats"""
+    """Users with associated deck stats"""
     __tablename__ = 'users'
     id = db.Column(db.Integer,
                    primary_key=True,
@@ -34,6 +34,7 @@ class User(db.Model):
 
     @classmethod
     def fetch_user(cls, username, tag, region):
+        """get a user from the db if present otherwise pull from the gameAPI"""
         user = cls.query.filter_by(username=username, tag=tag, region=region).first()
         if not user:
             uuid_apiCall = "https://{server}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{username}/{tagline}?api_key={key}".format(server=region, username=username, tagline=tag, key=riotkey)
@@ -46,18 +47,13 @@ class User(db.Model):
         return user
 
     def fetch_recent_matchIDs(cls):
+        """get recent matchids of games played by the user"""
         matches_apiCall = "https://{server}.api.riotgames.com/lor/match/v1/matches/by-puuid/{puuid}/ids?api_key={key}".format(server=cls.region, puuid=cls.riot_id, key=riotkey)
         matches_response = requests.get(matches_apiCall)
         return matches_response.json()
-    """
-    passwordhash = db.Column(db.String(80), 
-                    nullable=False)
-    isAdmin = db.Column(db.Boolean, 
-                    default=False)
-    """
 
 class Challenge(db.Model):
-    """A weekly deckbuilding challenge, """
+    """the weekly deckbuilding prompt, has an end-time and a set of requirements to meet"""
     __tablename__ = 'challenges'
     id = db.Column(db.Integer,
                    primary_key=True,
@@ -70,6 +66,7 @@ class Challenge(db.Model):
     requirements = db.relationship('Requirement', backref='challenge')
 
     def validate_deck(cls, deck_code):
+        """Tests if the deckcode meets the requirements for the challenge"""
         requirements = Requirement.query.filter(Requirement.challenge_id == cls.id)
         for requirement in requirements:
             if not requirement.test(deck_code):
@@ -78,10 +75,12 @@ class Challenge(db.Model):
 
     @classmethod
     def get_active_challenge(cls):
+        """gets the most recent challenge"""
         active = Challenge.query.order_by(Challenge.challenge_end.desc()).first()
         return active
 
     def fetch_requirements(cls):
+        """gets requirements"""
         return Requirement.query.filter(Requirement.challenge_id == cls.id)
 
 class Match(db.Model):
@@ -91,27 +90,33 @@ class Match(db.Model):
                    primary_key=True)
     riot_id = db.Column(db.String(100), db.ForeignKey(User.riot_id), nullable=False)
     
+    #deck info
     deck_code = db.Column(db.String(150))
     player_factions = db.Column(db.String(300))
     player_champions = db.Column(db.String(300))
 
+    #game info
     game_mode = db.Column(db.String(30))
     game_result = db.Column(db.String(10))
     game_start = db.Column(db.DateTime, 
                     nullable=False)
     game_type = db.Column(db.String(30))
 
+    #opponent info
     opponent_id  = db.Column(db.String(100))
     opponent_deck = db.Column(db.String(150))
     opponent_factions = db.Column(db.String(300))
     opponent_champions = db.Column(db.String(300))
 
+    #challenge info
     challenge_id = db.Column(db.Integer,  db.ForeignKey(Challenge.id))
     valid = db.Column(db.Boolean)
+
     user = db.relationship('User', backref='matches')
 
     @classmethod
     def match_stats_for_challenge(cls, uuid, chal_id):
+        """TODO builds out W/L ratio for the challenge"""
         wins = cls.query.filter(cls.challenge_id == chal_id, cls.riot_id == uuid, cls.valid, cls.game_result == "win" ).count()
         losses = cls.query.filter(cls.challenge_id == chal_id, cls.riot_id == uuid, cls.valid, cls.game_result == "loss" ).count()
         results = {
@@ -123,6 +128,7 @@ class Match(db.Model):
 
     @classmethod
     def fetch_match(cls, match_id, server, puuid):
+        """Calls on the API to get the match data if it's not already stored internally, processes that data down into a more usable format"""
         match = cls.query.get(match_id)
         if not match:
             match_apiCall = "https://{server}.api.riotgames.com/lor/match/v1/matches/{matchId}?api_key={key}".format(server=server, matchId=match_id, key=riotkey)
@@ -131,6 +137,7 @@ class Match(db.Model):
 
             challenge = Challenge.get_active_challenge()
 
+            #the player won't always be "player 1" so playernumb adapts to pull the right index
             playerNumb =  1 if data['info']['players'][0]['puuid'] != puuid else 0
             deckCode = data['info']['players'][playerNumb]['deck_code']
             
@@ -183,6 +190,7 @@ class Requirement(db.Model):
     challenge_id = db.Column(db.Integer, db.ForeignKey(Challenge.id))
 
     def test(cls, deck_code):
+        """Tests a deck-code to see if it contains the card to meet the requirement in a sufficient quantity"""
         if deck_code:
             deck = LoRDeck.from_deckcode(deck_code)
             for card in deck.cards:

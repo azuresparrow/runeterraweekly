@@ -20,8 +20,10 @@ def page_not_found(e):
     """404 NOT FOUND page."""
     return render_template('404.html'), 404
 
+
 @app.route('/')
-def default_route():
+def current_challenge():
+    """The home route, presents the currently ongoing deck-challenge it's possible to submit games for"""
     challenge = Challenge.get_active_challenge()
     requirements = challenge.fetch_requirements()
     submit_form = SubmitRecentGamesForm()
@@ -30,16 +32,21 @@ def default_route():
 
 @app.route('/user/<uid>/challenge/<cid>')
 def user_history(uid, cid):
+    """User-oriented view of past challenges preserving their match-history"""
     challenge = Challenge.query.get_or_404(cid)
+    # if the challenge path is the currently ongoing one, direct the user to the homepage instead.
+    if challenge.id == Challenge.get_active_challenge().id:
+        return redirect('/')
+
     user = User.query.get_or_404(uid)
     matches = Match.query.filter(Match.challenge_id == cid, Match.riot_id == user.riot_id, Match.valid, Match.game_mode == 'Constructed', Match.game_type != 'AI')
-    
     for match in matches:
         match.deck_code
     return render_template("user.html", matches=matches, challenge=challenge, user=user)
 
 @app.route('/user/<cid>', methods=["POST"])
 def search_results(cid):
+    """Search for user info to direct them to the correct challenge page"""
     form= SubmitRecentGamesForm()
     if form.validate_on_submit():
         server = form.region.data
@@ -52,29 +59,33 @@ def search_results(cid):
 
 @app.route('/cards')
 def cards():
-    Card.reload_card_db()
+    """Simple card list, mostly for admin purposes"""
     cards = Card.query.order_by("card_name").all()
     return render_template("cards.html", cards = cards)
 
 
 @app.route('/cards/<rarity>')
 def cards_at_rarity(rarity):
+    """Cards of a rarity"""
     cards = Card.query.filter(alchemyFn.lower(Card.card_rarity) == rarity)
     return render_template("cards.html", cards = cards)
 
 @app.route('/card/<code>')
 def get_card(code):
+    """Card with a specific card code"""
     card = Card.query.get_or_404(code)
     return render_template("card.html", card = card)
 
 @app.route('/challenges/<id>')
 def challenge(id):
+    """Detail view of a past challenge"""
     challenge = Challenge.query.get_or_404(id)
     submit_form = SubmitRecentGamesForm()
     return render_template("challenge.html", challenge=challenge, form=submit_form)
 
 @app.route('/challenges/')
 def challenge_list():
+    """Grid of past challenges"""
     current = Challenge.get_active_challenge()
     challenges = Challenge.query.join(Requirement).filter(Challenge.id != current.id)
     return render_template("challenges.html", challenges=challenges)
@@ -94,6 +105,7 @@ def leaderboard_list():
 
 @app.route('/submit/', methods=["POST"])
 def submit_games():
+    """Handle submission of new data for the current deckbuilding challenge"""
     form= SubmitRecentGamesForm()
     if form.validate_on_submit():
         server = form.region.data
