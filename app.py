@@ -2,13 +2,14 @@ from flask import Flask, request, render_template, redirect, flash, session, jso
 from models import db, connect_db, User, Challenge, Match, Card, Requirement
 from sqlalchemy import func as alchemyFn
 from forms import SubmitRecentGamesForm
+from secret import sessionkey
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///runeterraweekly'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
-app.config['SECRET_KEY'] = "supersecret"
+app.config['SECRET_KEY'] = sessionkey
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 connect_db(app)
@@ -26,8 +27,11 @@ def current_challenge():
     """The home route, presents the currently ongoing deck-challenge it's possible to submit games for"""
     challenge = Challenge.get_active_challenge()
     requirements = challenge.fetch_requirements()
-    submit_form = SubmitRecentGamesForm()
-    return render_template("home.html", challenge=challenge, requirements=requirements, form=submit_form)
+    user = None
+    if session['uid']:
+        user = User.query.get_or_404(session['uid'])
+    submit_form = SubmitRecentGamesForm(obj=user)
+    return render_template("home.html", challenge=challenge, requirements=requirements, form=submit_form, user=user)
 
 
 @app.route('/user/<uid>/challenge/<cid>')
@@ -35,8 +39,6 @@ def user_history(uid, cid):
     """User-oriented view of past challenges preserving their match-history"""
     challenge = Challenge.query.get_or_404(cid)
     # if the challenge path is the currently ongoing one, direct the user to the homepage instead.
-    if challenge.id == Challenge.get_active_challenge().id:
-        return redirect('/')
 
     user = User.query.get_or_404(uid)
     matches = Match.query.filter(Match.challenge_id == cid, Match.riot_id == user.riot_id, Match.valid, Match.game_mode == 'Constructed', Match.game_type != 'AI')
@@ -79,16 +81,27 @@ def get_card(code):
 @app.route('/challenges/<id>')
 def challenge(id):
     """Detail view of a past challenge"""
+    if session['uid']:
+        return redirect("/user/{}/challenge/{}".format(session['uid'], id))
     challenge = Challenge.query.get_or_404(id)
     submit_form = SubmitRecentGamesForm()
-    return render_template("challenge.html", challenge=challenge, form=submit_form)
+    user = None
+    return render_template("challenge.html", challenge=challenge, form=submit_form, user=user)
+
+@app.route('/end_session/')
+def end_session():
+    session['uid'] = ''
+    return redirect('/')
 
 @app.route('/challenges/')
 def challenge_list():
     """Grid of past challenges"""
     current = Challenge.get_active_challenge()
     challenges = Challenge.query.join(Requirement).filter(Challenge.id != current.id)
-    return render_template("challenges.html", challenges=challenges)
+    user = None
+    if session['uid']:
+        user = User.query.get_or_404(session['uid'])
+    return render_template("challenges.html", challenges=challenges, user=user)
 """
 @app.route('/leaderboard/')
 def leaderboard_list():
@@ -113,18 +126,26 @@ def submit_games():
         tagline = form.tag.data
 
         # get user by username/tagline/region
-        user = User.fetch_user(username=username, tag=tagline, region=server)
+        try:
+            user = User.fetch_user(username=username, tag=tagline, region=server)
+            session['uid'] = user.id
+        except KeyError:
+            flash("No {} found with that tag/region".format(username), 'danger')
+            return redirect('/')
         matchList = []
         # pull that user's match ids
         matchIDs = user.fetch_recent_matchIDs()
         
         for match_id in matchIDs:
             # check if match is already recorded internally to save external API calls
-            match = Match.fetch_match(match_id, server=user.region, puuid=user.riot_id)
-            if match:
-                matchList.append(match)
-
-        flash("{} new game(s) added".format(len(matchList)),'info')
+            try:
+                match = Match.fetch_match(match_id, server=user.region, puuid=user.riot_id)
+                if match:
+                    matchList.append(match)
+            except:
+                flash("Error while processing match data", 'danger')
+                return redirect('/')
+        flash("{} new game{} added".format(len(matchList), '' if len(matchList) == 1 else 's'),'info')
         return redirect("/user/{}/challenge/{}".format(user.id, Challenge.get_active_challenge().id))
     else:
         return redirect("/")

@@ -16,10 +16,16 @@
 .header {
     padding: 10px;
     background: #101011;
-    color: rgb(82, 142, 231);
-    font-size: 20px;
+    color: rgb(66, 140, 250);
+    font-size: 18px;
     box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
-  }
+    display: flex;
+    
+    text-align: right;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .header span {
     color: white;
 }
@@ -27,20 +33,33 @@
 .logo {
     max-width: 500px;
     display:inline-block;
+    text-decoration: none;
+    margin-bottom: -1em;
+    margin-top:.5em;
 }
 
-.logo a {
-    text-decoration: none;
+.logo a:hover {
+    color: rgb(74, 147, 255);
 }
 
 .logo a:visited {
-    color: rgb(82, 142, 231);
+    color: rgb(71, 119, 190);
     text-decoration: none;
 }
 
 .header a {
-    float:right;
-    margin:1em;
+    padding-right:2em;
+    margin-bottom:-1em;
+}
+
+.username {
+    text-align: right;
+    margin-top:-1em;
+    padding-right: 2em;
+}
+
+nav div {
+    min-width: 175px;
 }
 
 h1 {

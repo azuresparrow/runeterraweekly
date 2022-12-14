@@ -1,5 +1,14 @@
 <div class="header">
     <div class="logo"><a href="/"><h1>Runeterra<span>Weekly</span></h1></a></div>
-    <a href="/"> Leaderboard </a>
-    <a href="/challenges/"> Past Challenges</a>
+    <nav class="nav">
+        <div><a href="/"> Leaderboard </a></div>
+        <div><a href="/challenges/"> Past Challenges</a></div>
+        <div style="display:flex; flex-direction:column">
+        {% if user %}
+            <div class="username">{{user.username}}</div>
+            <a href="/end_session/"> End Session </a>
+        {% endif %}
+        </div>
+    </nav>
+    
 </div>

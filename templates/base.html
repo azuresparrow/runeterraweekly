@@ -15,8 +15,8 @@
     {% include 'header.html' %}
     <div  id="main">
     <div class="container mt-5 py-5 text-center">
-        {% for message in get_flashed_messages() %}
-            <p class="alert alert-dismissable alert-info">{{ message }}</p>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <p class="alert alert-dismissable alert-{{ category }}">{{ message }}</p>
         {% endfor %}
         {% block content %}
         {% endblock %}

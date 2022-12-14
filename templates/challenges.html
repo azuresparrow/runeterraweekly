@@ -3,7 +3,7 @@
     <div style="display:flex">
         {% for challenge in challenges %}
             <a   class="sm" href="/challenges/{{challenge.id}}">
-            <h1 class="my-1">{{challenge.name}}</h1>
+            <h3 class="my-1">{{challenge.name}}</h3>
             
             <div class="requirements">
             {% for requirement in challenge.requirements%}

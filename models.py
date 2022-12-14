@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask import flash
 import requests
 from secret import riotkey
 from lor_deckcodes import LoRDeck, CardCodeAndCount
@@ -161,7 +162,7 @@ class Match(db.Model):
                 'game_result' : data['info']['players'][playerNumb]['game_outcome'],
                 'game_start' : data['info']["game_start_time_utc"],
             }
-            if data['info']['game_mode'] != 'ThePathOfChampions':
+            if len(data['info']['players']) > 1:
                 matchInfo['opponent_deck'] = data['info']['players'][(playerNumb + 1) % 2]['deck_code']
                 matchInfo['opponent_id'] = data['info']['players'][(playerNumb + 1) % 2]['puuid']
                 factionList = data['info']['players'][(playerNumb + 1) % 2]['factions']
@@ -240,7 +241,7 @@ class Deck(db.Model):
             deck = LoRDeck.from_deckcode(deck_code)
             for card in deck.cards:
                 obj = Card.query.filter(Card.card_code == card.card_code).first() 
-                if obj.card_rarity == 'Champion':
+                if obj and obj.card_rarity == 'Champion':
                     result.append(obj.card_code)
         return ','.join(result)
 
