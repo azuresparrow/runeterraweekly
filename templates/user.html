@@ -31,9 +31,6 @@
               </tr>
             </thead>
             <tbody>
-              {% if matches|len == 0 %}
-                <p> No results found </p>
-              {% endif %}
               {% for match in matches %}
                 <tr>
                   <td>{{match.game_start.strftime('%Y-%m-%d %H:%M')}}</td>
