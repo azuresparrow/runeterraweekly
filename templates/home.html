@@ -1,6 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1 class="my-5">Week 1</h1>
-    <h3 class="my-5"></h3>
-    {{set}}
+<div style="display:flex; flex-direction:row">
+    <div style="flex:1">
+        {% with end_time=challenge.challenge_end %}
+            {% include 'timer.html' %}
+        {% endwith %}
+        <h1 class="my-1">{{challenge.name}}</h1>
+        <div class="requirements">
+            {% for requirement in requirements%}
+                <div class="requirement">
+                    <img src="../static/cards/{{requirement.card_code}}.png"/>
+                    <div style="clear:both">
+                    {% for n in range(requirement.card_quantity)%}
+                        ●
+                    {% endfor %}          
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+                
+        </div>
+
+    <div style="flex:1">
+        <p class="about-text">
+            A new deckbuilding prompt every week.
+            </p>
+            <p class="about-text">
+            Build a deck with the featured cards, play a few games, then record your results here! 
+        </p>
+        <div class="form">
+            <form method="POST"  id="submit-games-form" action="/submit">
+                <ul class="form-section">
+                    {{ form.hidden_tag() }} 
+                    {% for field in form
+                        if field.widget.input_type != 'hidden' %}
+                    <li>
+                        {{ field.label }}
+                        {{ field }}
+        
+                        {% for error in field.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </li>
+                    {% endfor %}
+                    
+                    <button class="btn btn-primary" type="submit">Submit Recent Games</button>
+                </ul>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

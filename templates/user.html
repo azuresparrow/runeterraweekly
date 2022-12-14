@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display:flex; flex-direction:row">
+    <div style="flex:1">
+        <h1 class="my-1">{{challenge.name}}</h1>
+        <div class="requirements">
+            {% for requirement in challenge.requirements%}
+                <div class="requirement">
+                    <img src="../../../static/cards/{{requirement.card_code}}.png"/>
+                    <div style="clear:both">
+                    {% for n in range(requirement.card_quantity)%}
+                        ●
+                    {% endfor %}          
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+                
+        </div>
+
+    <div style="flex:1">
+      <h1>{{user.username}}</h1>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Regions</th>
+                <th scope="col">Queue</th>
+                <th scope="col">Result</th>
+                <th scope="col">Opponent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if matches|len == 0 %}
+                <p> No results found </p>
+              {% endif %}
+              {% for match in matches %}
+                <tr>
+                  <td>{{match.game_start.strftime('%Y-%m-%d %H:%M')}}</td>
+                  <td>{% for faction in match.player_factions.split(',') %}
+                      <img style="width:35px;" src="../../../static/regions/{{faction}}.png"/>
+                      {% endfor %}</td>
+                  <td>{{match.game_type}}</td>
+                  <td>{{match.game_result}}</td>
+                  <td>{% for faction in match.opponent_factions.split(',') %}
+                    <img style="width:35px;" src="../../../static/regions/{{faction}}.png"/>
+                    {% endfor %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+{% endblock %}

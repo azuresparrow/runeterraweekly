@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+    <div style="display:flex">
+        {% for challenge in challenges %}
+            <a   class="sm" href="/challenges/{{challenge.id}}">
+            <h1 class="my-1">{{challenge.name}}</h1>
+            
+            <div class="requirements">
+            {% for requirement in challenge.requirements%}
+                <div class="requirement">
+                    <img src="../static/cards/{{requirement.card_code}}.png"/>       
+                </div>
+            {% endfor %}
+            </div></a>
+        {% endfor %}
+        </div>
+    </div>
+{% endblock %}

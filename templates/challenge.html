@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display:flex">
+    <div style="flex:1">
+<h1 class="my-1">{{challenge.name}}</h1>
+    <div class="requirements">
+    {% for requirement in challenge.requirements%}
+        <div class="requirement">
+            <img src="../static/cards/{{requirement.card_code}}.png"/>
+            <div style="clear:both">
+            {% for n in range(requirement.card_quantity)%}
+                ●
+            {% endfor %}          
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+    <div style="flex:1">
+        <p class="about-text">
+           This challenge has ended.
+        </p>
+        <div class="form">
+            <form method="POST"  id="submit-games-form" action="/user/{{challenge.id}}">
+                <ul class="form-section">
+                    {{ form.hidden_tag() }} 
+                    {% for field in form
+                        if field.widget.input_type != 'hidden' %}
+                    <li>
+                        {{ field.label }}
+                        {{ field }}
+        
+                        {% for error in field.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </li>
+                    {% endfor %}
+                    
+                    <button class="btn btn-primary" type="submit">Search Results</button>
+                </ul>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

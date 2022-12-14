@@ -29,6 +29,15 @@
     display:inline-block;
 }
 
+.logo a {
+    text-decoration: none;
+}
+
+.logo a:visited {
+    color: rgb(82, 142, 231);
+    text-decoration: none;
+}
+
 .header a {
     float:right;
     margin:1em;
@@ -36,4 +45,109 @@
 
 h1 {
     font-family: 'Titillium Web', sans-serif;
+}
+
+.requirements{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.requirement{
+    display:block;
+    font-size: larger;
+    padding:1em;
+    color: rgb(82, 142, 231);
+}
+
+#timer { 
+    color:rgb(82, 142, 231);
+    font-size: larger;
+}
+.form {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+.form-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: .5em;
+}
+
+.form-section {
+    display:flex;
+    flex-direction: column;
+    align-items:flex-end;
+}
+
+button {
+    margin:1em;
+}
+
+li > label {
+    flex: 1;
+    margin-right:20px;
+    display:inline-block;
+}
+
+li > input, li > select {
+    flex: 1;
+    box-sizing: border-box;
+    width:150px;
+}
+
+li > input, li > button {
+    text-align: left;
+}
+
+ul {
+    list-style: none;
+    background: #101011;
+    padding: 1em 2em;
+    color:rgb(99, 99, 99);
+}
+
+ul button {
+    align-items: center;
+}
+
+li {
+    padding: .3em;
+}
+
+.about-text {
+    font-size: x-large;
+    color: rgb(82, 142, 231);
+    margin:2em;
+}
+
+.sm {
+    max-width: 450px;
+    padding:1em;
+    border:rgba(61, 59, 90, 0.459) 1px solid;
+}
+
+.sm img {
+    height:200px;
+}
+
+.sm:hover{
+    background-color: rgba(82, 142, 231, 0.24);
+}
+
+.sm a {
+    text-decoration: none;
+}
+
+a { 
+    text-decoration: none;
+}
+
+.table {
+    color : rgb(82, 142, 231);
+}
+td {
+    vertical-align: middle;
+    text-transform: capitalize;
 }

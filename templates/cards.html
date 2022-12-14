@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="my-5">Cards</h1>
+    <h3 class="my-5"></h3>
+    {%for card in cards %}
+       <div><a id={{card.card_code}} href="/card/{{card.card_code}}">{{card.card_name}}</a></div> 
+    {% endfor %}
+{% endblock %}

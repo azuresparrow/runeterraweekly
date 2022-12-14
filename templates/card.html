@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="my-5">{{card.card_name}}</h1>
+    <section><img src="../static/cards/{{card.card_code}}.png"/></section>
+    <a style="display:block" href="/cards#{{card.card_code}}">back</a>
+{% endblock %}
