@@ -1,0 +1,18 @@
+<script type="text/javascript">
+    var intervalID = setInterval(update_values,1000);
+    var end = new Date("{{end_time}}");
+    update_values();
+    function leadZero(num){
+        return ('00'+ num).slice(-2);
+    }
+    function update_values() {
+        const remaining = end - Date.now();
+        const seconds = Math.floor( (remaining/1000) % 60 );
+        const minutes = Math.floor( (remaining/1000/60) % 60 );
+        const hours = Math.floor( (remaining/(1000*60*60)) % 24 );
+        const days = Math.floor( remaining/(1000*60*60*24) );
+        let res = ""
+        $('#timer').text(leadZero(days) + ":" + leadZero(hours) + ":" + leadZero(minutes) + ":" + leadZero(seconds));
+    }
+ </script>
+<div id="timer">07:00:00:00</div>
