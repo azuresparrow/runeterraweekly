@@ -15,4 +15,10 @@ The standard flow of the website:
     - return and enter their username/tag/region to submit the games
     - get a match-history of the performance of their deck
         * compare it to others
+    - creates a session so it's easy to look at past submissions
+
+to see the "in session funtionality" use 
+azure sparrow
+NA1
+Americas
 
