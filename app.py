@@ -28,7 +28,7 @@ def current_challenge():
     challenge = Challenge.get_active_challenge()
     requirements = challenge.fetch_requirements()
     user = None
-    if session['uid']:
+    if session.get('uid'):
         user = User.query.get_or_404(session['uid'])
     submit_form = SubmitRecentGamesForm(obj=user)
     return render_template("home.html", challenge=challenge, requirements=requirements, form=submit_form, user=user)
